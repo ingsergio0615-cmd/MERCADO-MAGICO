@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['name', 'completedLevels', 'levelStars'])
+        && data.name is string && data.name.size() <= 100
+        && data.completedLevels is list
+        && data.levelStars is map
+        && (data.get('updatedAt', null) == null || data.updatedAt is timestamp);
+    }
+
+    // 3. Collection Rules
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) 
+                    && request.resource.data.keys().size() <= 10; // Prevent ghost fields
+      allow update: if isOwner(userId) && isValidUser(request.resource.data)
+                    && request.resource.data.keys().size() <= 10;
+    }
+  }
+}

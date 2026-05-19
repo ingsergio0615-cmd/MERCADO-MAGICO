@@ -1,0 +1,8 @@
+{
+  "name": "El Mercado Mágico de Ada",
+  "description": "Explora el mercado de Ada: una pizzería, chocolatería y laboratorio para aprender fracciones de forma divertida.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

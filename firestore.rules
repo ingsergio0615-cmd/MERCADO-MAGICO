@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Master catch-all deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidUser(data) {
+      // Basic schema validation
+      return data.keys().hasAll(['name', 'completedLevels', 'levelStars'])
+        && data.name is string && data.name.size() <= 100
+        && (data.get('color', null) == null || (data.color is string && data.color.size() <= 7))
+        && (data.get('avatar', null) == null || (data.avatar is string && data.avatar.size() <= 10))
+        && data.completedLevels is list && data.completedLevels.size() <= 20
+        && data.levelStars is map && data.levelStars.size() <= 20
+        && (data.get('updatedAt', null) == null || data.updatedAt is timestamp);
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+    }
+  }
+}

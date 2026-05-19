@@ -1,0 +1,24 @@
+{
+  "entities": {
+    "UserProgress": {
+      "title": "Progreso del Usuario",
+      "description": "Almacena los datos del chef y su progreso en los niveles.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Nombre del chef" },
+        "color": { "type": "string", "description": "Color temático elegido" },
+        "avatar": { "type": "string", "description": "Avatar elegido" },
+        "completedLevels": { "type": "array", "description": "IDs de niveles completados" },
+        "levelStars": { "type": "object", "description": "Mapa de nivel ID a número de estrellas" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Última actualización" }
+      },
+      "required": ["name", "completedLevels", "levelStars"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProgress",
+      "description": "Documento único por usuario con todo su progreso."
+    }
+  }
+}
